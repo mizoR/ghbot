@@ -6,30 +6,28 @@ require 'ghbot'
 
 Dotenv.load
 
-login    = ENV['GITHUB_LOGIN']
-password = ENV['GITHUB_PASSWORD']
-ssl      = ENV['SSL'] == 'on'
-uri      = URI.parse(ENV['IRC_URL'])
-channel  = uri.path
-
-if channel =~ %r<^/>
-  channel[0] = '#'
-end
+uri         = URI.parse(ENV['IRC_URL'])
+ssl         = (uri.scheme == 'ircs')
+user = nick = (uri.user.to_s     == '') ? 'ghbot' : uri.user
+password    = (uri.password.to_s == '') ?     nil : uri.password
+channel     = ((uri.path =~ %r<^/(\w+)>) && ('#' + $1)) \
+  or raise ArgumentError.new('channel not found')
 
 bot = Cinch::Bot.new do
   configure do |c|
-    c.nick      = 'ghbot'
     c.server    = uri.host
     c.port      = uri.port
-    c.user      = uri.user      if uri.user.to_s != ''
-    c.password  = uri.password  if uri.password.to_s != ''
+    c.user      = user
+    c.nick      = nick
+    c.password  = password if password
     c.channels  = [channel]
     c.ssl.use   = ssl
+
     c.plugins.plugins = [
       Ghbot::Notifier.plugin(
         :channel  => channel,
-        :login    => login,
-        :password => password
+        :login    => ENV['GITHUB_LOGIN'],
+        :password => ENV['GITHUB_PASSWORD']
       )
     ]
   end
