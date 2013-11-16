@@ -58,8 +58,8 @@ module Ghbot
               :title    => subject.title,
               :body     => latest_comment.body,
               :html_url => html_url,
-              :commented_on => subject.type.downcase,
-              :commented_by => latest_comment.user.login,
+              :commented_on =>  "#{subject.type.downcase} of #{repository.full_name}",
+              :commented_by => latest_comment.user.login
             )
 
             @last_retrieved_at = updated_at
