@@ -67,12 +67,13 @@ module Ghbot
         end
 
         def send(params={})
-          view = \
-            "\x02\x0301,00#{params[:title]}\017 - #{params[:html_url]}\n" \
-            "\x0314 commented on #{params[:commented_on]} "               \
-            "by #{params[:commented_by]}\017\n"                           \
-            "#{params[:body]}\n\n "
-          Channel(channel).send(view)
+          header_view   = "\x02\x0301,00#{params[:title]}\017 - #{params[:html_url]}"
+          extra_view    = "\x0314 commented on #{params[:commented_on]} by #{params[:commented_by]}\017\n"
+          content_view  = "#{params[:body]}\n\n "
+
+          Channel(channel).send(header_view)
+          Channel(channel).notice(extra_view)
+          Channel(channel).send(content_view)
         end
 
         def locked?
